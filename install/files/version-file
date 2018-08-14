@@ -1,0 +1,11 @@
+2.0.3
+
+# Used for UpdateScript function.
+
+# Ignore:
+# 1. version-file.
+# 2. Update notes header.
+# 3. youtube-dl.ps1 help section.
+# 4. youtube-dl.ps1 $RunningVersion variable
+# 5. README.md header
+# 6. README.md change log

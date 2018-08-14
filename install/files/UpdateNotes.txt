@@ -1,0 +1,29 @@
+
+===================================================================================================
+                                      Notes for version 2.0.3                                      
+===================================================================================================
+
+ 1.  The '\scripts' folder has been removed, and the 'youtube-dl.ps1' file now sits in the
+     root folder. BECAUSE OF THIS, IT'S RECOMMENDED THAT YOU DO A FULL REINSTALL OF THE SCRIPT.
+     Doing a full reinstall will ensure that the shortcuts' paths are updated.
+
+ 2.  There are now two download archive files. The file 'DownloadVideoArchive.txt' stores
+     the URL ID's of links that were downloaded using option '1  - Download video'. The file
+     'DownloadAudioArchive.txt' stores the URL ID's of links that were downloaded using 
+     option '2  - Download audio'.
+	
+ 3.  Refactored some code involving installing and updating the script. If the script file is
+     updated while the script is installed, the desktop and start menu shortcuts will be
+     updated too. This should help updating in the future if file paths change again.
+
+ 4.  Any cache data downloaded from Youtube-dl will be stored in the new '\cache' folder.
+
+ 5.  The script now automatically checks for updates on startup. This can be toggled using
+     the '$CheckForUpdates = ' script file setting.
+
+ 6.  When running the script in portable mode (not running the script in the folder
+     C:\Users\%USERNAME%\Scripts\Youtube-dl), video and audio will be downloaded to the same
+     folder as the script. This location can be modified via the '$PortableSaveLocation = '
+     script file setting.
+
+===================================================================================================

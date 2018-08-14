@@ -1,0 +1,16 @@
+# Playlist URLs listed in this file under their respective categories will
+# be downloaded if option '3  - Download from playlist file' is chosen on
+# the main menu, or the '-PlaylistFile' option is used when running the
+# script from the command line.
+
+# Keep in mind that video and audio downloaded from playlists listed in this
+# file will record their URL ID in the DownloadArchive.txt file and will not
+# download a second time while the script setting '$UseArchiveFile = $True'.
+
+# Lines starting with '#' are commented out and will be ignored by the script.
+
+[Video Playlists]
+# https://youtube.com/ExamplePlaylistURLToDownloadVideoFrom
+
+[Audio Playlists]
+# https://youtube.com/ExamplePlaylistURLToDownloadAudioFrom
