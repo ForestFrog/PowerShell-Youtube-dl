@@ -85,7 +85,7 @@ $AudioSaveLocation = "$ENV:USERPROFILE\Music\Youtube-dl"
 $PortableSaveLocation = "$PSScriptRoot"
 $UseArchiveFile = $True
 $EntirePlaylist = $False
-$VerboseDownloading = $False
+$VerboseDownloading = $True
 $CheckForUpdates = $True
 
 $ConvertFile = $False
@@ -97,6 +97,7 @@ $StartTime = ""
 $StopTime = ""
 $StripAudio = ""
 $StripVideo = ""
+
 
 
 # ======================================================================================================= #
@@ -147,10 +148,8 @@ Function DownloadFfmpeg {
 	}
 
 	Expand-Archive -Path "$BinFolder\ffmpeg_latest.zip" -DestinationPath "$BinFolder"
-	
-	Copy-Item -Path "$BinFolder\ffmpeg-*-win*-static\bin\*" -Destination "$BinFolder" -Recurse -Filter "*.exe" -ErrorAction Silent
-	Remove-Item -Path "$BinFolder\ffmpeg_latest.zip"
-	Remove-Item -Path "$BinFolder\ffmpeg-*-win*-static" -Recurse
+	Copy-Item -Path "$BinFolder\ffmpeg-*-win*-static\bin\*" -Destination "$BinFolder" -Recurse -Filter "*.exe"
+	Remove-Item -Path "$BinFolder\ffmpeg_latest.zip","$BinFolder\ffmpeg-*-win*-static" -Recurse
 }
 
 
@@ -159,13 +158,13 @@ Function DownloadFfmpeg {
 # These all are dependent on the $RootFolder location, which is either the directory in which the
 # script is running or the install location "C:\Users\%USERNAME%\Scripts\Youtube-dl".
 Function ScriptInitialization {
-	$Script:BinFolder = $RootFolder + "\bin"
+	$Script:BinFolder = "$RootFolder\bin"
 	If ((Test-Path "$BinFolder") -eq $False) {
 		New-Item -Type Directory -Path "$BinFolder" | Out-Null
 	}
 	$ENV:Path += ";$BinFolder"
 
-	$Script:TempFolder = $RootFolder + "\temp"
+	$Script:TempFolder = "$RootFolder\temp"
 	If ((Test-Path "$TempFolder") -eq $False) {
 		New-Item -Type Directory -Path "$TempFolder" | Out-Null
 	}
@@ -173,27 +172,27 @@ Function ScriptInitialization {
 		Remove-Item -Path "$TempFolder\download.tmp" -ErrorAction Silent
 	}
 	
-	$Script:CacheFolder = $RootFolder + "\cache"
+	$Script:CacheFolder = "$RootFolder\cache"
 	If ((Test-Path "$CacheFolder") -eq $False) {
 		New-Item -Type Directory -Path "$CacheFolder" | Out-Null
 	}
 
-	$Script:ConfigFolder = $RootFolder + "\config"
+	$Script:ConfigFolder = "$RootFolder\config"
 	If ((Test-Path "$ConfigFolder") -eq $False) {
 		New-Item -Type Directory -Path "$ConfigFolder" | Out-Null
 	}
 
-	$Script:VideoArchiveFile = $ConfigFolder + "\DownloadVideoArchive.txt"
+	$Script:VideoArchiveFile = "$ConfigFolder\DownloadVideoArchive.txt"
 	If ((Test-Path "$VideoArchiveFile") -eq $False) {
 		New-Item -Type file -Path "$VideoArchiveFile" | Out-Null
 	}
 	
-	$Script:AudioArchiveFile = $ConfigFolder + "\DownloadAudioArchive.txt"
+	$Script:AudioArchiveFile = "$ConfigFolder\DownloadAudioArchive.txt"
 	If ((Test-Path "$AudioArchiveFile") -eq $False) {
 		New-Item -Type file -Path "$AudioArchiveFile" | Out-Null
 	}
 
-	$Script:PlaylistFile = $ConfigFolder + "\PlaylistFile.txt"
+	$Script:PlaylistFile = "$ConfigFolder\PlaylistFile.txt"
 	If ((Test-Path "$PlaylistFile") -eq $False) {
 		DownloadFile "https://github.com/mpb10/PowerShell-Youtube-dl/raw/master/install/files/PlaylistFile.txt" "$PlaylistFile"
 	}
@@ -216,11 +215,10 @@ Function InstallScript {
 		If ($MenuOption -like "y" -or $MenuOption -like "yes") {
 			Write-Host "`nInstalling to ""$InstallLocation"" ..."
 
-			$Script:RootFolder = $ENV:USERPROFILE + "\Scripts\Youtube-dl"
+			$Script:RootFolder = "$ENV:USERPROFILE\Scripts\Youtube-dl"
 			ScriptInitialization
-			
-			$DesktopFolder = $ENV:USERPROFILE + "\Desktop"
-			$StartFolder = $ENV:APPDATA + "\Microsoft\Windows\Start Menu\Programs\Youtube-dl"
+			$DesktopFolder = "$ENV:USERPROFILE\Desktop"
+			$StartFolder = "$ENV:APPDATA\Microsoft\Windows\Start Menu\Programs\Youtube-dl"
 			If ((Test-Path "$StartFolder") -eq $False) {
 				New-Item -Type Directory -Path "$StartFolder" | Out-Null
 			}
@@ -229,11 +227,8 @@ Function InstallScript {
 			DownloadFfmpeg
 
 			Copy-Item "$PSScriptRoot\youtube-dl.ps1" -Destination "$RootFolder"
-			
 			DownloadFile "https://github.com/mpb10/PowerShell-Youtube-dl/raw/master/install/files/Youtube-dl.lnk" "$RootFolder\Youtube-dl.lnk"
-			Copy-Item "$RootFolder\Youtube-dl.lnk" -Destination "$DesktopFolder\Youtube-dl.lnk"
-			Copy-Item "$RootFolder\Youtube-dl.lnk" -Destination "$StartFolder\Youtube-dl.lnk"
-			
+			Copy-Item "$RootFolder\Youtube-dl.lnk" -Destination "$DesktopFolder\Youtube-dl.lnk","$StartFolder\Youtube-dl.lnk"
 			DownloadFile "https://github.com/mpb10/PowerShell-Youtube-dl/raw/master/LICENSE" "$RootFolder\LICENSE.txt"
 			DownloadFile "https://github.com/mpb10/PowerShell-Youtube-dl/raw/master/README.md" "$RootFolder\README.md"
 
@@ -281,6 +276,9 @@ Function UpdateScript {
 		
 		If ($MenuOption -like "y" -or $MenuOption -like "yes") {
 			DownloadFile "http://github.com/mpb10/PowerShell-Youtube-dl/raw/master/youtube-dl.ps1" "$RootFolder\youtube-dl.ps1"
+			DownloadFile "https://github.com/mpb10/PowerShell-Youtube-dl/raw/master/install/files/Youtube-dl.lnk" "$RootFolder\Youtube-dl.lnk"
+			DownloadFile "https://github.com/mpb10/PowerShell-Youtube-dl/raw/master/LICENSE" "$RootFolder\LICENSE.txt"
+			DownloadFile "https://github.com/mpb10/PowerShell-Youtube-dl/raw/master/README.md" "$RootFolder\README.md"
 			
 			If ($PSScriptRoot -eq "$InstallLocation") {
 				$DesktopFolder = $ENV:USERPROFILE + "\Desktop"
@@ -288,13 +286,9 @@ Function UpdateScript {
 				If ((Test-Path "$StartFolder") -eq $False) {
 					New-Item -Type Directory -Path "$StartFolder" | Out-Null
 				}
-				DownloadFile "https://github.com/mpb10/PowerShell-Youtube-dl/raw/master/install/files/Youtube-dl.lnk" "$RootFolder\Youtube-dl.lnk"
-				Copy-Item "$RootFolder\Youtube-dl.lnk" -Destination "$DesktopFolder\Youtube-dl.lnk"
-				Copy-Item "$RootFolder\Youtube-dl.lnk" -Destination "$StartFolder\Youtube-dl.lnk"
-				DownloadFile "https://github.com/mpb10/PowerShell-Youtube-dl/raw/master/LICENSE" "$RootFolder\LICENSE.txt"
-				DownloadFile "https://github.com/mpb10/PowerShell-Youtube-dl/raw/master/README.md" "$RootFolder\README.md"
+				Copy-Item "$RootFolder\Youtube-dl.lnk" -Destination "$DesktopFolder\Youtube-dl.lnk","$StartFolder\Youtube-dl.lnk"
 			}
-			
+
 			DownloadFile "https://github.com/mpb10/PowerShell-Youtube-dl/raw/master/install/files/UpdateNotes.txt" "$TempFolder\UpdateNotes.txt"
 			Get-Content "$TempFolder\UpdateNotes.txt"
 			Remove-Item "$TempFolder\UpdateNotes.txt"
@@ -319,8 +313,7 @@ Function UpdateScript {
 
 
 
-# Set variables that contain youtube-dl or ffmpeg options/parameters. These are then placed in the
-# youtube-dl command.
+# Set variables that contain youtube-dl or ffmpeg options. These are then placed in the youtube-dl command.
 Function SettingsInitialization {
 	If ($UseArchiveFile -eq $True) {
 		$Script:SetVideoArchiveFile = "--download-archive ""$VideoArchiveFile"""
@@ -376,7 +369,7 @@ Function DownloadVideo {
 	$URLToDownload = $URLToDownload.Trim()
 	Write-Host "`nDownloading video from: $URLToDownload`n"
 	If ($URLToDownload -like "*youtube.com/playlist*" -or $EntirePlaylist -eq $True) {
-		$YoutubedlCommand = "youtube-dl -o ""$VideoSaveLocation\%(playlist)s\%(title)s.%(ext)s"" --ignore-errors --console-title --no-mtime $SetVerboseDownloading --cache-dir ""$CacheFolder"" $DownloadOptions $FfmpegCommand --yes-playlist $SetVideoArchiveFile ""$URLToDownload"""
+		$YoutubedlCommand = "youtube-dl -o ""$VideoSaveLocation\%(playlist)s\%(playlist_index)s - %(title)s.%(ext)s"" --ignore-errors --console-title --no-mtime $SetVerboseDownloading --cache-dir ""$CacheFolder"" $DownloadOptions $FfmpegCommand --yes-playlist $SetVideoArchiveFile ""$URLToDownload"""
 	}
 	Else {
 		$YoutubedlCommand = "youtube-dl -o ""$VideoSaveLocation\%(title)s.%(ext)s"" --ignore-errors --console-title --no-mtime $SetVerboseDownloading --cache-dir ""$CacheFolder"" $DownloadOptions $FfmpegCommand $SetEntirePlaylist ""$URLToDownload"""
@@ -639,13 +632,15 @@ If ($PSVersionTable.PSVersion.Major -lt 5) {
 # function to work with certain sites that only accept certain protocols (youtube-dl's site).
 [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
 
+# Used to determine if we're running in command line mode.
 $NumOfParams = ($PSBoundParameters.Count)
 
+# Location to install the script to.
 $InstallLocation = "$ENV:USERPROFILE\Scripts\Youtube-dl"
 
-# Determines if the script is running in portable mode or if it's installed.
+# Determines if the script is running in portable mode or if it's already installed.
 If ($PSScriptRoot -eq "$InstallLocation") {
-	$RootFolder = $ENV:USERPROFILE + "\Scripts\Youtube-dl"
+	$RootFolder = "$InstallLocation"
 }
 Else {
 	$RootFolder = "$PSScriptRoot"
@@ -655,26 +650,30 @@ Else {
 
 # If the script is not being installed, initialize the location variables.
 If ($Install -eq $False) {
+	
 	ScriptInitialization
+
+	# Checks for updates to the script file on startup provided that the $CheckForUpdates script file setting
+	# is set to $True.
+	If ($CheckForUpdates -eq $True) {
+		UpdateScript
+	}
+
+	# Checks if the youtube-dl.exe file is present in the bin folder. If not, download it.
+	If ((Test-Path "$BinFolder\youtube-dl.exe") -eq $False) {
+		Write-Host "`nyoutube-dl.exe not found. Downloading and installing to: ""$BinFolder"" ...`n" -ForegroundColor "Yellow"
+		DownloadYoutube-dl
+	}
+
+	# Checks if the ffmpeg .exe files are present in the bin folder. If not, download them.
+	If ((Test-Path "$BinFolder\ffmpeg.exe") -eq $False -or (Test-Path "$BinFolder\ffplay.exe") -eq $False -or (Test-Path "$BinFolder\ffprobe.exe") -eq $False) {
+		Write-Host "ffmpeg files not found. Downloading and installing to: ""$BinFolder"" ...`n" -ForegroundColor "Yellow"
+		DownloadFfmpeg
+	}
+	
 }
 
-# Performs and automatic update check on startup provided that the $CheckForUpdates script file setting
-# is set to $True and the script isn't being installed.
-If ($CheckForUpdates -eq $True -and $Install -eq $False) {
-	UpdateScript
-}
 
-# Checks if the youtube-dl.exe file is present in the bin folder. If not, download it.
-If ((Test-Path "$BinFolder\youtube-dl.exe") -eq $False -and $Install -eq $False) {
-	Write-Host "`nyoutube-dl.exe not found. Downloading and installing to: ""$BinFolder"" ...`n" -ForegroundColor "Yellow"
-	DownloadYoutube-dl
-}
-
-# Checks if the ffmpeg .exe files are present in the bin folder. If not, download them.
-If (((Test-Path "$BinFolder\ffmpeg.exe") -eq $False -or (Test-Path "$BinFolder\ffplay.exe") -eq $False -or (Test-Path "$BinFolder\ffprobe.exe") -eq $False) -and $Install -eq $False) {
-	Write-Host "ffmpeg files not found. Downloading and installing to: ""$BinFolder"" ...`n" -ForegroundColor "Yellow"
-	DownloadFfmpeg
-}
 
 # Determine whether to run the script in command line mode or to run the CLI-based GUI menus. Does so
 # by checking if any parameters have been passed to the script. No parameters means run the GUI.
@@ -685,8 +684,8 @@ Else {
 
 	MainMenu
 	
-	PauseScript
 	Exit
+	
 }
 
 
